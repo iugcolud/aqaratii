@@ -41,72 +41,62 @@ if ($httpCode == 200 && strpos($response, 'Registration successful!') !== false)
 
 
 
-contact
+//contact
 
 <?php
-// Set the contact form data
-$name = 'John Doe';
-$email = 'john.doe@example.com';
-$message = 'This is a test message';
+// Simulate form submission
+$_POST['submit'] = true;
+$_POST['name'] = 'John Doe';
+$_POST['email'] = 'test@example.com';
+$_POST['message'] = 'This is a test message';
 
-// Initialize cURL
-$ch = curl_init();
+ob_start();
+include 'contact-us.php'; // Replace 'your_file_name.php' with the actual file name containing the code
+$output = ob_get_clean();
 
-// Set the cURL options
-curl_setopt($ch, CURLOPT_URL, 'https://www.example.com/contact');
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-    'name' => $name,
-    'email' => $email,
-    'message' => $message
-]));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects if any
-
-// Execute the cURL request
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-// Close cURL
-curl_close($ch);
-
-// Verify the contact form submission response
-if ($httpCode == 200 && strpos($response, 'Thank you for your message!') !== false) {
-    echo "Contact form submitted successfully!";
+// Assert that the email was sent successfully
+if (strpos($output, 'Mail Sent.') !== false) {
+    echo "Test Passed: Mail Sent successfully.\n";
 } else {
-    echo "Contact form submission failed!";
+    echo "Test Failed: Mail not sent.\n";
+}
+
+// Assert the email headers and content
+if (
+    isset($GLOBALS['headers']) &&
+    isset($GLOBALS['headers2']) &&
+    isset($GLOBALS['message']) &&
+    isset($GLOBALS['message2']) &&
+    strpos($GLOBALS['headers'], 'From:test@example.com') !== false &&
+    strpos($GLOBALS['headers2'], 'From:') !== false &&
+    strpos($GLOBALS['message'], 'John Doe wrote the following:') !== false &&
+    strpos($GLOBALS['message'], 'This is a test message') !== false &&
+    strpos($GLOBALS['message2'], 'Here is a copy of your message John Doe') !== false &&
+    strpos($GLOBALS['message2'], 'This is a test message') !== false
+) {
+    echo "Test Passed: Email headers and content are correct.\n";
+} else {
+    echo "Test Failed: Email headers or content are incorrect.\n";
 }
 ?>
 
 
 
-search
+
+//search
 
 <?php
 // Set the search query
 $searchQuery = 'example search query';
 
-// Initialize cURL
-$ch = curl_init();
+// Set the search URL with the query string
+$searchUrl = 'http://localhost/renthouse/search-property.php?search_property=' . urlencode($searchQuery); // Replace with the actual URL of your search functionality
 
-// Set the cURL options
-curl_setopt($ch, CURLOPT_URL, 'https://www.example.com/search');
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-    'q' => $searchQuery
-]));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects if any
-
-// Execute the cURL request
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-// Close cURL
-curl_close($ch);
+// Perform the HTTP request and get the response
+$response = file_get_contents($searchUrl);
 
 // Verify the search response
-if ($httpCode == 200 && strpos($response, 'Search results for') !== false) {
+if ($response !== false && strpos($response, 'Searched Properties') !== false) {
     echo "Search successful!";
 } else {
     echo "Search failed!";
@@ -115,7 +105,7 @@ if ($httpCode == 200 && strpos($response, 'Search results for') !== false) {
 
 
 
-add
+//add
 
 <?php
 // Retrieve the data from the form or request parameters
